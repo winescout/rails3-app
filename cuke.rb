@@ -7,6 +7,7 @@ gem "haml-rails", ">= 0.3.4"
 gem "launchy", ">= 0.3.7", :group => [:cucumber, :test]
 gem "rspec-rails", ">= 2.2.1", :group => [:cucumber, :development, :test]
 gem "spork", ">= 0.8.4", :group => [:cucumber, :test]
+gem "devise"
 
 generators = <<-GENERATORS
 
@@ -42,6 +43,29 @@ create_file "app/views/layouts/application.html.haml", layout
 create_file "log/.gitkeep"
 create_file "tmp/.gitkeep"
 
+file ".gitignore", <<-END
+.DS_Store
+log/*.log
+tmp/**/*
+  config/database.yml
+db/*.sqlite3
+END
+
+run "rvm use --create --rvmrc ruby-1.9.2@#{app_name}"
+run "gem install bundler"
+run "bundle install"
+
+generate 'rspec:install'
+generate 'cucumber:install --rspec --capybara'
+generate 'devise:install'
+generate 'devise User'
+route 'devise_for :users'
+
+generate :controller, "welcome index"
+route 'root :to => "welcome#index"'
+
+
+
 git :init
 git :add => "."
 
@@ -50,7 +74,7 @@ docs = <<-DOCS
 Run the following commands to complete the setup of #{app_name.humanize}:
 
 % cd #{app_name}
-% rvm use --create --rvmrc default@#{app_name}
+% rvm use --create --rvmrc ruby-1.9.2@#{app_name}
 % gem install bundler
 % bundle install
 % script/rails generate rspec:install
